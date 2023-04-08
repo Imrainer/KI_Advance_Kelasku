@@ -67,19 +67,19 @@ function editpage($user_id)
     return view('/pages/EditUser',compact(['data']),['sekolah'=>$sekolah]);
 }
 
-function edit($user_id, Request $request) {
-    
+function edit(request $request) {
 
-    $data = User::find($user_id);
-      
+    $data = Auth::user();
+    // dd($data);
     $data->update([
-    'nama' =>($request->input('nama')),
-    'sekolah_id' =>($request->input('sekolah_id')),
-    'foto' =>( $request->file('foto'))
+        'nama' =>($request->input('nama')),
+        'sekolah_id' =>($request->input('sekolah_id')),
+        'foto' => ($request->file('foto'))
     ]);
-    
+
     if($request->file('foto')) {
-      $data['foto'] =  $request->file('foto')->store('foto_profil');
+        $data['foto'] =  $request->file('foto')->store('foto_profil');
+        User::where('user_id',$data['user_id'])->update(['foto'=>$data['foto']]);
     }
    
     return redirect('/dashboard');

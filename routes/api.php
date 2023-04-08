@@ -34,11 +34,12 @@ Route::get('/user/{user_id}',[UserControllers::class, 'byId']);
 Route::post('/editprofile',[UserControllers::class, 'edit']);
 Route::post('/editpassword',[UserControllers::class, 'editpassword']);
 Route::delete('/deleteuser/{user_id}',[UserControllers::class, 'delete']);
-Route::post('like/{user_id}',[UserControllers::class,'likeFriend']);
-
 Route::get('editprofile', function(){
     return app('files')->link(storage_path('app'), public_path('uploud'));
 });
+
+Route::post('/like/{user_id}', [UserControllers::class, 'like'])->name('like');
+Route::post('/unlike/{user_id}', [UserControllers::class, 'unlike'])->name('unlike');
 
 Route::post('getnotif',[UserControllers::class, 'getNotify']);
 

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Models\User;
+use App\Models\like;
 use App\Notifications\MyClassNotification;
 
 class UserControllers extends Controller
@@ -49,7 +50,7 @@ public function byId ($user_id)
 
 function register(Request $request) {
 
-    $validator = $request->validate([
+    $validator = Validator::make($request->all(), [
     'nama' => 'required',
     'sekolah_id'=> 'required',
     'nomor_telepon' => 'required',
@@ -60,6 +61,12 @@ function register(Request $request) {
     'sekolah_id|required'=> 'Nama Sekolah Harus Diiisi',
     'nomor_telepon|required' => 'Nomor Telepon Harus Diisi',
     'password|required'=>'Password Harus Diisi']);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'errors' => $validator->errors(),
+        ], 422);
+    }
 
 
     $data = [
@@ -88,6 +95,7 @@ if($data) {
 function edit(request $request) {
 
     $data = Auth::user();
+    // dd($data);
     $data->update([
         'nama' =>($request->input('nama')),
         'sekolah_id' =>($request->input('sekolah_id')),
@@ -95,7 +103,9 @@ function edit(request $request) {
     ]);
 
     if($request->file('foto')) {
+        // $fileName = time().$request->File('foto')->getClientOriginalName();
         $data['foto'] =  $request->file('foto')->store('foto_profil');
+        User::where('user_id',$data['user_id'])->update(['foto'=>$data['foto']]);
     }
     return Api::createApi(200, 'successfully updated', $data);
     }
@@ -201,27 +211,51 @@ return $this->respondWithToken($token);
 
     curl_close($ch);
 
-    return'terkirim';
+    return Api::createApi(200, 'successfully sent');;
      
      }
 
      
- public function likeFriend(Request $request,$user_id)
-    {
-        $user = Auth::user(); // Mendapatkan user saat ini
-        $user = User::find($user_id);
-        if ($request->action == 'like') {
-            // $user->likeByYou = true;
-            // $user->likes += 1; // Menambah jumlah like pada teman
-        } else if ($request->action == 'dislike') {
-            $user->likeByYou = false;
-            $user->likes -= 1; // Mengurangi jumlah like pada teman
-        }
+//  public function likeFriend(Request $request,$user_id)
+//     {
+//         $user = Auth::user(); // Mendapatkan user saat ini
+//         $user = User::find($user_id);
+//         if ($request->action == 'like') {
+//             // $user->likeByYou = true;
+//             // $user->likes += 1; // Menambah jumlah like pada teman
+//         } else if ($request->action == 'dislike') {
+//             $user->likeByYou = false;
+//             $user->likes -= 1; // Mengurangi jumlah like pada teman
+//         }
         
     
-        $user->save(); // Menyimpan perubahan pada kolom likes
-        return response()->json(['message' => 'Action successful']);
-    }
+//         $user->save(); // Menyimpan perubahan pada kolom likes
+//         return response()->json(['message' => 'Action successful']);
+//     }
+
+public function like($user_id)
+{
+    $likedBy = Auth::user()->user_id;
+
+    $like = Like::firstOrCreate([
+        'user_id' => $user_id,
+        'liked_by' => $likedBy,
+    ]);
+
+    return Api::createApi(200, 'success', 'You have Liked ' .$user_id);
+}
+
+public function unlike($user_id)
+{
+    $likedBy = Auth::user()->user_id;
+
+    $like = Like::where([
+        'user_id' => $user_id,
+        'liked_by' => $likedBy,
+    ])->delete();
+
+    return Api::createApi(200, 'success', 'You have Unliked ' . $user_id);
+}
 
 
 

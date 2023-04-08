@@ -1,7 +1,7 @@
 <x-layout title="Login">
    
     <div class="container mt-5 col-md-5 shadow-lg">
-    <form action="/login" class="p-3" method="POST">
+    <form action="login" class="p-3" method="POST">
         @csrf
         <h1 class="fw-bold">Form Login </h1>
         

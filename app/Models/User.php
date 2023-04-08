@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable  implements JWTSubject
+class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -37,24 +37,28 @@ class User extends Authenticatable  implements JWTSubject
     //  }
 
      public function sekolah(){
-        return $this->belongsTo(Sekolah::class, "sekolah_id");
+        return $this->belongsTo('App\Models\Sekolah', "sekolah_id");
      }
 
+     public function likes()
+     {
+         return $this->hasMany(Like::class);
+     }
 
-     public function like()
-    {
-        $this->likes_count++;
-        $this->liked_by_you = true;
-        $this->save();
-    }
+    //  public function like()
+    // {
+    //     $this->likes_count++;
+    //     $this->liked_by_you = true;
+    //     $this->save();
+    // }
 
-    public function likedByYou()
-    {
-        if (!Auth::check()) {
-            return false;
-        }
-        return $this->likes()->where('user_id', Auth::id())->exists();
-    }
+    // public function likedByYou()
+    // {
+    //     if (!Auth::check()) {
+    //         return false;
+    //     }
+    //     return $this->likes()->where('user_id', Auth::id())->exists();
+    // }
 
     /**
      * The attributes that should be hidden for serialization.
