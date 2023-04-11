@@ -10,7 +10,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <form action="/create-store" method="POST">
+            <form action="/ki/Rainer/KI_Advance1of5/KI_Advance_MyClass/KI_Advance_Kelasku/public/create-store" method="POST">
               @csrf
   
                 <div class="mb-3">

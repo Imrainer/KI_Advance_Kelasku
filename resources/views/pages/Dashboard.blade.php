@@ -10,7 +10,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>    
       <div class="modal-body">
-        <form action="/register" method="POST">
+        <form action="/ki/Rainer/KI_Advance1of5/KI_Advance_MyClass/KI_Advance_Kelasku/public/register" method="POST">
           @csrf
             <div class="mb-3">
               <label for="exampleInputEmail1" class="form-label">Nama</label>
@@ -73,8 +73,8 @@
             <td>{{$item->sekolah->sekolah}}</td>
             <td>{{$item->foto}}</td>
             <td>
-            <a href="/edit/{{$item->user_id}}" class="me-1 fas fa-pen text-primary text-decoration-none"></a>
-            <a href="/deleteuser/{{$item->user_id}}" class="ms-1 fas fa-trash text-danger"></a>  
+            <a href="/ki/Rainer/KI_Advance1of5/KI_Advance_MyClass/KI_Advance_Kelasku/public/edit/{{$item->user_id}}" class="me-1 fas fa-pen text-primary text-decoration-none"></a>
+            <a href="/ki/Rainer/KI_Advance1of5/KI_Advance_MyClass/KI_Advance_Kelasku/public/deleteuser/{{$item->user_id}}" class="ms-1 fas fa-trash text-danger"></a>  
             <td>
           </tr>
           @endforeach

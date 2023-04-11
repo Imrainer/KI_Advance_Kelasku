@@ -30,6 +30,7 @@ Route::post('/logout',[UserControllers::class, 'logout']);
 Route::post('data_user',[UserControllers::class,'data']);
 Route::post('refresh',[UserControllers::class,'refresh']);
 Route::get('/listuser',[UserControllers::class, 'index']);
+Route::get('/myfriend',[UserControllers::class, 'myfriend']);
 Route::get('/user/{user_id}',[UserControllers::class, 'byId']);
 Route::post('/editprofile',[UserControllers::class, 'edit']);
 Route::post('/editpassword',[UserControllers::class, 'editpassword']);

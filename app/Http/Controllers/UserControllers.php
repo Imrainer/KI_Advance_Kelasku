@@ -33,6 +33,17 @@ public function index ()
 
 }
 
+public function myfriend ()
+{
+    $data = Auth::id();
+    $users = User::where('user_id', '<>', $data)->get();
+
+    
+   return Api::createApi(200, 'success', $users);
+   
+
+}
+
 public function byId ($user_id)
 {
     $data = User::find($user_id);
