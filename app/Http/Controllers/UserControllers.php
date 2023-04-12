@@ -150,10 +150,15 @@ function delete($user_id){
 
 function login (request $request){
 
-$credentials = request(['nomor_telepon','password']);
+$credentials = request->validate([
+    'nomor_telepon'=>'required',
+    'password'=>'required'],[
+        'nomor_telepon|required'=>'Nomer Hp harus diisi',
+        'password|required'=>'Password harus diisi'
+    ]);
 
 if (! $token = auth()->attempt($credentials)) {
-    return response()->json(['error' => 'Unauthorized'], 401);
+    return response()->json()->withErrors('Nomer Telepon dan Password Invalid');
 }
 return $this->respondWithToken($token);
 }
@@ -226,24 +231,6 @@ return $this->respondWithToken($token);
      
      }
 
-     
-//  public function likeFriend(Request $request,$user_id)
-//     {
-//         $user = Auth::user(); // Mendapatkan user saat ini
-//         $user = User::find($user_id);
-//         if ($request->action == 'like') {
-//             // $user->likeByYou = true;
-//             // $user->likes += 1; // Menambah jumlah like pada teman
-//         } else if ($request->action == 'dislike') {
-//             $user->likeByYou = false;
-//             $user->likes -= 1; // Mengurangi jumlah like pada teman
-//         }
-        
-    
-//         $user->save(); // Menyimpan perubahan pada kolom likes
-//         return response()->json(['message' => 'Action successful']);
-//     }
-
 public function like($user_id)
 {
     $likedBy = Auth::user()->user_id;
@@ -267,7 +254,6 @@ public function unlike($user_id)
 
     return Api::createApi(200, 'success', 'You have Unliked ' . $user_id);
 }
-
 
 
 }
