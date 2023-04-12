@@ -149,19 +149,17 @@ function delete($user_id){
 //<!----lOGIN---->
 
 function login (request $request){
-
-$credentials = request->validate([
-    'nomor_telepon'=>'required',
-    'password'=>'required'],[
-        'nomor_telepon|required'=>'Nomer Hp harus diisi',
-        'password|required'=>'Password harus diisi'
-    ]);
+$credentials = request(['nomor_telepon','password']);
 
 if (! $token = auth()->attempt($credentials)) {
-    return response()->json()->withErrors('Nomer Telepon dan Password Invalid');
+    return response()->json([
+        'status' => 400,
+        'message' => 'Invalid Nomor Telepon dan Password']);
 }
 return $this->respondWithToken($token);
+
 }
+
   
   // <!----LOGOUT----!>
   function logout() 
