@@ -198,8 +198,8 @@ return $this->respondWithToken($token);
     $deviceToken = $request->header('to');
 
     $data = [
-        'title' => $request->header('title'),
-        'body' => $request->header('body'),
+        'title' => $request->body('title'),
+        'body' => $request->body('body'),
     ];
 
     $headers = [
