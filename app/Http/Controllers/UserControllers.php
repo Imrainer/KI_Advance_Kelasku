@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Models\User;
-use App\Models\like;
+use App\Models\Like;
 use App\Notifications\MyClassNotification;
 
 class UserControllers extends Controller
@@ -198,12 +198,12 @@ return $this->respondWithToken($token);
     $deviceToken = $request->header('to');
 
     $data = [
-        'title' => $request->body('title'),
-        'body' => $request->body('body'),
+        'title' => $request->header('title'),
+        'body' => $request->header('body'),
     ];
 
     $headers = [
-        'Authorization: key=' . $request->header('Authorization'),
+        'Authorization: key='.$request->header('Authorization'),
         'Content-Type: application/json',
     ];
 
@@ -224,8 +224,16 @@ return $this->respondWithToken($token);
     $response = curl_exec($ch);
 
     curl_close($ch);
+    if ($response === false) {
+        die('cURL error: ' . curl_error($ch));
+    }
 
-    return Api::createApi(200, 'successfully sent');;
+    $responseData = json_decode($response, true);
+
+    if (isset($responseData['error'])) {
+        die('FCM API error: ' . $responseData['error']);
+    }
+    return Api::createApi(200, 'successfully sent', $data);;
      
      }
 
