@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Models\User;
+use App\Models\Admin;
 use App\Models\Sekolah;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Storage; 
@@ -96,26 +97,29 @@ function delete($user_id)
 
 function logpage()
 {   
-    $sekolah = Sekolah::all();
-    return view('/pages/login',['sekolah'=>$sekolah]);
+    return view('/pages/login');
 }
 
 //<!----lOGIN---->
 
 function login (request $request){
 
-    $credentials = $request->only('nomor_telepon', 'password');
+    $credentials = $request->validate([
+    'nomor_telepon'=>'required|email',
+    'password'=>'required', 
+    ], [
+      'nomor_telepon.required' => 'Nomor Telepon harus diisi',
+      'password.required' => 'Password harus diisi',
+    ]);
+      
+    
+    if(Auth::guard('admin')->attempt($credentials)){
+        return redirect('/dashboard')->with('Berhasil Login');
+      } else {
+      return redirect('/')->withErrors('Email dan Password Invalid');
+      }
+  }
 
-    if (Auth::attempt($credentials)) {
-        $user = Auth::user();
-        $token = JWTAuth::fromUser($user);
-        $user->api_token = $token;
-        $user->save();
-        return redirect('/dashboard')->with('success', 'Login successful');
-    }
-
-    return redirect()->route('login')->with('error', 'Invalid credentials');
-}
 
 // <!----LOGOUT----!>
 function logout() 

@@ -25,12 +25,9 @@ use App\Http\Controllers\SekolahControllers;
 
 Route::get('/',[DashboardControllers::class, 'logpage'])->name('login');
 Route::post('/login',[DashboardControllers::class, 'login'])->middleware('guest');
-Route::get('/logout', function (Request $request) {
-$request->user()->token()->revoke();
-    return response()->json([
-        'message' => 'Successfully logged out' ]);})->middleware('auth:api');
-        
-// Route::middleware('auth')->group(function () {
+Route::get('/logout', [DashboardControllers::class,'logout']);
+
+Route::middleware('auth')->group(function () {
 Route::get('/dashboard',[DashboardControllers::class, 'index']);
 Route::post('/register',[DashboardControllers::class, 'register']);
 Route::get('/edit/{user_id}',[DashboardControllers::class, 'editpage']);
@@ -41,7 +38,8 @@ Route::post('/create-store',[ViewControllers::class, 'register']);
 Route::get('/editsekolah/{sekolah_id}',[ViewControllers::class, 'editpage']);
 Route::put('/editstore/{sekolah_id}',[ViewControllers::class, 'edit']);
 Route::get('/deletesekolah/{sekolah_id}',[ViewControllers::class, 'delete']);
-//  });
+ });
+
 Route::get('link', function(){
     return app('files')->link(storage_path('app'), public_path('uploud'));
 });
