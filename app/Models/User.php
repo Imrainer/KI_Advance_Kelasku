@@ -26,7 +26,7 @@ class User extends Authenticatable implements JWTSubject
         'sekolah_id',
         'nomor_telepon',
         'password',
-        'api_token',
+        'device_token',
         'foto',
         'likes',
         'likeByYou'

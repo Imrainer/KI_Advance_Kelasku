@@ -17,6 +17,7 @@ class AdminTableSeeder extends Seeder
     {
         Admin::create([
             'nama' => 'Admin 1',
+            'email' => 'Admin1@gmail.com',
             'nomor_telepon' => '081932758058',
             'password' =>Hash::make('123456'),
         ]);

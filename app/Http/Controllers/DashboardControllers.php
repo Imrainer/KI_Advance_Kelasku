@@ -17,10 +17,11 @@ class DashboardControllers extends Controller
 {
 
 public function index ()
-{
+{   $admin = session('admin_id');
+    $admin = Admin::where('admin_id', $admin)->first();
     $data = User::all();
   $sekolah = Sekolah::all();
-   return view('pages/Dashboard',['data'=>$data],['sekolah'=>$sekolah]);
+   return view('pages/Dashboard',compact(['admin','data','sekolah']));
 
 }
 
@@ -68,9 +69,9 @@ function editpage($user_id)
     return view('/pages/EditUser',compact(['data']),['sekolah'=>$sekolah]);
 }
 
-function edit(request $request) {
+function edit(request $request, $user_id) {
 
-    $data = Auth::user();
+    $data = User::find($user_id);
     // dd($data);
     $data->update([
         'nama' =>($request->input('nama')),
@@ -86,6 +87,47 @@ function edit(request $request) {
     return redirect('/dashboard');
 }
 
+function profilepage()
+{  $data = session('admin_id');
+
+  $data = Admin::where('admin_id', $data)->first();
+    // dd($data);
+    return view('/pages/profil',compact(['data']));
+}
+
+function editprofile(request $request) {
+
+    $data = session('admin_id');
+
+    $data = Admin::where('admin_id', $data)->first();
+    // dd($user);
+    $data->update([
+        'nama' =>($request->input('nama')),
+        'email' =>($request->input('email')),
+        'nomor_telepon' =>($request->input('nomor_telepon')),
+    ]);
+
+    return redirect('/profil')->with('Profil berhasil diperbarui');
+}
+
+function editphoto(request $request) {
+
+    $data = session('admin_id');
+
+    $data = Admin::where('admin_id', $data)->first();
+    // dd($request->all());
+    $data->update([
+        'foto' => ($request->file('foto'))
+    ]);
+
+    if($request->file('foto')) {
+        $data['foto'] =  $request->file('foto')->store('foto_profil');
+        Admin::where('admin_id',$data['admin_id'])->update(['foto'=>$data['foto']]);
+    }
+   
+    return redirect('/profil')->with('Profil berhasil diperbarui');
+}
+
 
 function delete($user_id)
 {
@@ -97,35 +139,43 @@ function delete($user_id)
 
 function logpage()
 {   
-    return view('/pages/login');
+    $sekolah = Sekolah::all();
+    return view('/pages/login',['sekolah'=>$sekolah]);
 }
 
 //<!----lOGIN---->
 
 function login (request $request){
 
-    $credentials = $request->validate([
-    'nomor_telepon'=>'required|email',
-    'password'=>'required', 
-    ], [
-      'nomor_telepon.required' => 'Nomor Telepon harus diisi',
-      'password.required' => 'Password harus diisi',
-    ]);
-      
-    
-    if(Auth::guard('admin')->attempt($credentials)){
-        return redirect('/dashboard')->with('Berhasil Login');
-      } else {
-      return redirect('/')->withErrors('Email dan Password Invalid');
-      }
+    $nomor_telepon = $request->input('nomor_telepon');
+    $password = $request->input('password');
+
+    $admin = Admin::where('nomor_telepon', $nomor_telepon)->first();
+
+    if ($admin && password_verify($password, $admin->password)) {
+        session()->put('admin_id',[
+            'admin_id' => $admin->admin_id,
+            'admin_nama' => $admin->nama,
+            'admin_email'=>$admin->email,
+            'admin_nomor_telepon' => $admin->nomor_telepon,
+            'admin_foto'=>$admin->foto,
+        ]);
+
+        return redirect('/dashboard')->with('success','Berhasil Login');
+    } else {
+        return redirect('/')->with('error', 'Invalid email or password');
+    }
   }
 
 
 // <!----LOGOUT----!>
-function logout() 
+function logout(Request $request)
 {
-    auth()->logout(); 
-    return redirect('/')->with('Berhasil Logout');
+    $request->session()->forget('admin_id');
+    $request->session()->forget('admin_nama');
+    $request->session()->forget('admin_nomor_telepon');
+    
+    return redirect('/')->with('success','Berhasil Logout');
 }
 
 }

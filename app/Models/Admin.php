@@ -19,8 +19,10 @@ class Admin extends Model implements AuthenticatableContract
 
     protected $fillable = [
         'nama',
+        'email',
         'nomor_telepon',
-        'password'
+        'password',
+        'foto'
     ];
    
 

@@ -27,7 +27,7 @@ Route::get('/',[DashboardControllers::class, 'logpage'])->name('login');
 Route::post('/login',[DashboardControllers::class, 'login'])->middleware('guest');
 Route::get('/logout', [DashboardControllers::class,'logout']);
 
-Route::middleware('auth')->group(function () {
+Route::middleware('authname')->group(function () {
 Route::get('/dashboard',[DashboardControllers::class, 'index']);
 Route::post('/register',[DashboardControllers::class, 'register']);
 Route::get('/edit/{user_id}',[DashboardControllers::class, 'editpage']);

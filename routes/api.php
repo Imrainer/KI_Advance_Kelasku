@@ -29,8 +29,8 @@ Route::post('/logout',[UserControllers::class, 'logout']);
     
 Route::post('data_user',[UserControllers::class,'data']);
 Route::post('refresh',[UserControllers::class,'refresh']);
-Route::get('/listuser',[UserControllers::class, 'index']);
 Route::get('/myfriend',[UserControllers::class, 'myfriend']);
+Route::get('/listuser',[UserControllers::class, 'index']);
 Route::get('/user/{user_id}',[UserControllers::class, 'byId']);
 Route::post('/editprofile',[UserControllers::class, 'edit']);
 Route::post('/editpassword',[UserControllers::class, 'editpassword']);
@@ -42,7 +42,7 @@ Route::get('editprofile', function(){
 Route::post('/like/{user_id}', [UserControllers::class, 'like'])->name('like');
 Route::post('/unlike/{user_id}', [UserControllers::class, 'unlike'])->name('unlike');
 
-Route::post('getnotif',[UserControllers::class, 'getNotify']);
+Route::post('/getnotif',[UserControllers::class, 'getNotify']);
 
 //SEKOLAH
 Route::get('/listsekolah',[SekolahControllers::class, 'index']);

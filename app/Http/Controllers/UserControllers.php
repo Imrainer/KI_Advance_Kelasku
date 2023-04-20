@@ -23,40 +23,76 @@ public function __construct()
 
 public function index ()
 {
-    $data = User::all();
+    
+    $users = User::all();
 
-    if($data){
-        return Api::createApi(200, 'success', $data);
-    } else {
-        return Api::createApi(400, 'failed');
+    foreach ($users as $user) {
+        if ($user->foto) {
+            $user->foto = 'https://magang.crocodic.net/ki/Rainer/KI_Advance_Kelasku/public/storage/' . $user->foto;
+        }
     }
+
+   return Api::createApi(200, 'success', $users);
 
 }
 
 public function myfriend ()
-{
-    $data = Auth::id();
-    $users = User::where('user_id', '<>', $data)->get();
-
+{   
+    $authenticatedUserId = Auth::id();
+    $users = User::whereNotIn('user_id',[ $authenticatedUserId])->get();
+    foreach ($users as $user) {
+        $total_likes = Like::where('liked_by',$authenticatedUserId)->count();
+        $like = Like::where('user_id',$user->user_id)->where('liked_by',$authenticatedUserId)->first();
+        // dd($like);
+        if(!$like) {
+            $like_by_you = false;
+        } else {
+            $like_by_you = true;
+        }
+        
+        if ($user->foto) {
+            $user->foto = 'https://magang.crocodic.net/ki/Rainer/KI_Advance_Kelasku/public/storage/' . $user->foto;
+        }
     
-   return Api::createApi(200, 'success', $users);
-   
+        // Menambahkan properti like_by_you ke setiap objek pengguna
+        $user->like_by_you = $like_by_you;
+    }
 
+    return response()->json([
+        'status' => '200',
+        'data' => $users,
+    ], 200);
 }
 
 public function byId ($user_id)
-{
-    $data = User::find($user_id);
+{   
+    $authenticatedUserId = Auth::id();
+    $user = User::find($user_id);
 
-    if($data){
-        return Api::createApi(200, 'success', $data);
+    $total_likes = Like::where('liked_by',$authenticatedUserId)->count();
+        $like = Like::where('user_id',$user->user_id)->where('liked_by',$authenticatedUserId)->first();
+        // dd($like);
+        if(!$like) {
+            $like_by_you = false;
+        } else {
+            $like_by_you = true;
+        }
+
+    if ($user && $user->foto) {
+        $user->foto = 'https://magang.crocodic.net/ki/Rainer/KI_Advance_Kelasku/public/storage/' . $user->foto;
+    }
+
+    $user->total_likes = Like::where('liked_by',$user)->count();
+    $user->like_by_you = $like_by_you;
+
+
+    if ($user) {
+        return Api::createApi(200, 'success', $user);
     } else {
         return Api::createApi(400, 'failed');
     }
 
 }
-
-
     //<!------CREATE----!>
 
 function register(Request $request) {
@@ -64,14 +100,15 @@ function register(Request $request) {
     $validator = Validator::make($request->all(), [
     'nama' => 'required',
     'sekolah_id'=> 'required',
-    'nomor_telepon' => 'required',
+    'nomor_telepon' => 'required|unique:users,nomor_telepon',
     'password'=>'required',
     'foto' => 'image|file'
     ],[
-    'nama|required' => 'Nama Harus Diisi',
-    'sekolah_id|required'=> 'Nama Sekolah Harus Diiisi',
-    'nomor_telepon|required' => 'Nomor Telepon Harus Diisi',
-    'password|required'=>'Password Harus Diisi']);
+    'nama.required' => 'Nama Harus Diisi',
+    'sekolah_id.required'=> 'Nama Sekolah Harus Diiisi',
+    'nomor_telepon.required' => 'Nomor Telepon Harus Diisi',
+    'nomor_telepon.unique'=> 'Nomer Telepon sudah terdaftar, Silahkan gunakan Nomor Telepon lain',
+    'password.required'=>'Password Harus Diisi']);
 
     if ($validator->fails()) {
         return response()->json([
@@ -148,18 +185,24 @@ function delete($user_id){
 
 //<!----lOGIN---->
 
-function login (request $request){
-$credentials = request(['nomor_telepon','password']);
+public function login(Request $request)
+{
+    $credentials = $request->only('nomor_telepon','password');
 
-if (! $token = auth()->attempt($credentials)) {
-    return response()->json([
-        'status' => 400,
-        'message' => 'Invalid Nomor Telepon dan Password']);
+    if (! $token = auth()->attempt($credentials)) {
+        return response()->json([
+            'status' => 401,
+            'message' => 'Invalid Nomor Telepon dan Password'
+        ], 401);
+    }
+
+    // Simpan device token ke dalam database
+    $user = auth()->user();
+    $user->device_token = $request->input('device_token');
+    $user->save();
+
+    return $this->respondWithToken($token);
 }
-return $this->respondWithToken($token);
-
-}
-
   
   // <!----LOGOUT----!>
   function logout() 
@@ -170,8 +213,22 @@ return $this->respondWithToken($token);
 
   public function data()
     {
-        return response()->json( auth()->user());
-    }
+        $id =  auth()->user()->user_id;
+            $data = User::where('user_id',$id)->first();
+    
+            if($data['foto']) {
+                $data->foto = 'https://magang.crocodic.net/ki/Rainer/KI_Advance_Kelasku/public/storage/'.$data['foto'];
+            } else {
+                $data->foto = null;
+            }
+
+            $data->total_likes = Like::where('liked_by',$id)->count();
+    
+             return response()->json([
+                'status' => 200,
+                'data' => $data],
+                200
+            );    }
 
     public function refresh()
     {
@@ -180,10 +237,12 @@ return $this->respondWithToken($token);
 
 
   protected function respondWithToken($token)
-    {
+    {   $credentials = request(['nomor_telepon','password','device_token']);
+
         return response()->json([
             'status' => 200,
             'message'=> 'successfully login',
+            'data' => $credentials,
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60
@@ -195,15 +254,15 @@ return $this->respondWithToken($token);
 
     function getNotify (Request $request) {
   
-    $deviceToken = $request->header('to');
+    $deviceToken = $request->input('to');
 
     $data = [
-        'title' => $request->header('title'),
-        'body' => $request->header('body'),
+        'title' => $request->input('title'),
+        'body' => $request->input('body'),
     ];
 
     $headers = [
-        'Authorization: key='.$request->header('Authorization'),
+        'Authorization: key=AAAAylmGvBQ:APA91bGw39t-VqLdjYcypirGqdvNnzQD_XRlNdSSVr6zEI8CGQPwB-vNN_yUE8dp3g81dv7zVMKMY3pGtz5Hp8J_Vb1Yg89RPMWIuCLjN-OG0vZaexQHSi162v72eg2Yg-yV-Suu8848',
         'Content-Type: application/json',
     ];
 

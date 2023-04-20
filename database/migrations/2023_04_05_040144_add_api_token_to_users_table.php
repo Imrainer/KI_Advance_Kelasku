@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('api_token', 315)->unique()->nullable()->default(null)->after('password');
+            $table->string('device_token', 315)->unique()->nullable()->default(null)->after('password');
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('api_tokenP');
+            $table->dropColumn('device_token');
         });
     }
 };
