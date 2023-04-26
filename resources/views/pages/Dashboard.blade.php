@@ -1,6 +1,7 @@
 <x-layout title="Dashboard">
+ 
 <div class="d-flex">
-<x-Sidebar title="Dashboard"></x-Sidebar>
+<x-Sidebar photo="{{$admin->foto}}" name="{{$admin->nama}}"></x-Sidebar>
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -10,15 +11,16 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>    
       <div class="modal-body">
-        <form action="/ki/Rainer/KI_Advance1of5/KI_Advance_MyClass/KI_Advance_Kelasku/public/register" method="POST">
+      
+        <form action="/register" method="POST">
           @csrf
             <div class="mb-3">
               <label for="exampleInputEmail1" class="form-label">Nama</label>
-              <input type="text" class="form-control" name="nama" id="exampleInputEmail1">
+              <input type="text" class="form-control" name="nama">
             </div>
             <div class="mb-3">
                 <label for="exampleInputEmail1" class="form-label">Nomor Telepon</label>
-                <input type="number" class="form-control" name="nomor_telepon" id="exampleInputEmail1">
+                <input type="number" class="form-control" name="nomor_telepon">
               </div>
 
                 <div class="form-group"> 
@@ -44,6 +46,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         <button type="submit" class="btn btn-outline-primary">Submit</button>
+       
       </form> 
     </div>
 
@@ -52,8 +55,29 @@
   </div>
 </div>
 
-  <div class="mt-5 container col-md-8">
-    <button data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-outline-success mb-1"><i class="fas fa-user-plus"></i> Add New</button>
+  <div class=" col-md-10">
+
+    @if (session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+@endif
+
+@foreach($errors->all() as $msg)
+  <div class="alert alert-danger">{{$msg}}</div>
+  @endforeach
+  
+
+<div class="mt-5 ms-5 col-md-9 ">
+
+    <button data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-outline-success mb-1 mt-3"><i class="fas fa-user-plus"></i> Add New</button>
+    
+    <form action="http://localhost/laravel/public/dashboard" method="GET" class="col-md-6 mt-3">
+      <div class="mb-3 d-flex">
+        <i class="fas fa-search mt-2 me-3"></i>
+        <input type="search" name="search" class="form-control col-md-5" placeholder="Type here">
+        <button class="btn btn-outline-success ms-3">Search</button>
+      </div>
+    </form>
+    
     <table class="table">
         <thead>
           <tr>
@@ -62,6 +86,7 @@
             <th scope="col">No. Telepon</th>
             <th scope="col">Nama Sekolah</th>
             <th scope="col">Foto</th>
+            <th scope="col">Action</th>
           </tr>
         </thead>
         <tbody>       
@@ -71,15 +96,22 @@
             <td>{{$item->nama}}</td>
             <td>{{$item->nomor_telepon}}</td>
             <td>{{$item->sekolah->sekolah}}</td>
-            <td>{{$item->foto}}</td>
+            @if (empty($item->foto) )
+            <td> </td>
+            @else
+            <td> <img src="{{ asset ('storage/' . $item->foto) }}"  class="rounded-circle" width="40px" alt="Foto Profil "></td>
+            @endif
             <td>
-            <a href="/ki/Rainer/KI_Advance1of5/KI_Advance_MyClass/KI_Advance_Kelasku/public/edit/{{$item->user_id}}" class="me-1 fas fa-pen text-primary text-decoration-none"></a>
-            <a href="/ki/Rainer/KI_Advance1of5/KI_Advance_MyClass/KI_Advance_Kelasku/public/deleteuser/{{$item->user_id}}" class="ms-1 fas fa-trash text-danger"></a>  
+            <a href="http://localhost/laravel/public/edit/{{$item->user_id}}" class="me-1 fas fa-pen text-primary text-decoration-none"></a>
+            <a href="http://localhost/laravel/public/deleteuser/{{$item->user_id}}" class="ms-1 fas fa-trash text-danger"></a>  
             <td>
           </tr>
           @endforeach
         </tbody>
       </table>
+
+      {{$data->links()}}
 </div>
 </div>
+
 </x-layout>

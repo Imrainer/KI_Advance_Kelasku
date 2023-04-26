@@ -2,7 +2,7 @@
    
     <div class="container col-md-5">
       @foreach ( $data as $item)
-      <form action="/ki/Rainer/KI_Advance1of5/KI_Advance_MyClass/KI_Advance_Kelasku/public/editprofile/{{$data->user_id}}" method="POST">
+      <form action="http://localhost/laravel/public/editprofile/{{$data->user_id}}" method="POST" enctype="multipart/form-data">
         @csrf @method('put')
         @endforeach
         <h1> Form Edit User </h1>

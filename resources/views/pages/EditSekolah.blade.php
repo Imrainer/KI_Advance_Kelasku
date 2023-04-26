@@ -1,7 +1,7 @@
 <x-layout title="Add New">
    
     <div class="container col-md-5">
-    <form action="/ki/Rainer/KI_Advance1of5/KI_Advance_MyClass/KI_Advance_Kelasku/public/editstore/{{$data->sekolah_id}}" method="POST">
+    <form action="http://localhost/laravel/public/editstore/{{$data->sekolah_id}}" method="POST">
       @csrf @method('put')
         <h1>Form Edit Sekolah </h1>
         <div class="mb-3">

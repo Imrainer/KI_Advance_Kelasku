@@ -16,20 +16,31 @@ use Illuminate\Support\Facades\Storage;
 class DashboardControllers extends Controller
 {
 
-public function index ()
+public function index (request $request)
 {   $admin = session('admin_id');
     $admin = Admin::where('admin_id', $admin)->first();
-    $data = User::all();
+
+    if($request->has('search')){
+        $data = User::where('nama', 'LIKE', '%' .$request->search.'%')->paginate(5);
+    } else {
+         $data = User::paginate(5);
+    }
+
   $sekolah = Sekolah::all();
    return view('pages/Dashboard',compact(['admin','data','sekolah']));
-
 }
 
-public function sekolah ()
-{
-    $data = Sekolah::all();
+public function sekolah (request $request)
+{   $admin = session('admin_id');
+    $admin = Admin::where('admin_id', $admin)->first();
+
+    if($request->has('search')){
+        $data = Sekolah::where('sekolah', 'LIKE', '%' . $request->search. '%')->paginate(5);
+    } else {
+        $data = Sekolah::paginate(5);
+    }
   
-   return view('pages/Sekolah',['data'=>$data]);
+   return view('pages/Sekolah',compact(['admin','data']));
 
 }
 
@@ -39,14 +50,15 @@ function register(Request $request) {
     $validator = $request->validate([
     'nama' => 'required',
     'sekolah_id'=> 'required',
-    'nomor_telepon' => 'required',
+    'nomor_telepon' => 'required|unique:users,nomor_telepon',
     'password'=>'required',
     'foto' => 'nullable|image|file'
     ],[
     'nama|required' => 'Nama Harus Diisi',
-    'sekolah_id|required'=> 'Nama Sekolah Harus Diiisi',
-    'nomor_telepon|required' => 'Nomor Telepon Harus Diisi',
-    'password|required'=>'Password Harus Diisi']);
+    'sekolah_id.required'=> 'Nama Sekolah Harus Diiisi',
+    'nomor_telepon.required' => 'Nomor Telepon Harus Diisi',
+    'nomor_telepon.unique'=> 'Nomer Telepon sudah terdaftar, Silahkan gunakan Nomor Telepon lain',
+    'password.required'=>'Password Harus Diisi']);
 
 
     $data = [
@@ -91,7 +103,6 @@ function profilepage()
 {  $data = session('admin_id');
 
   $data = Admin::where('admin_id', $data)->first();
-    // dd($data);
     return view('/pages/profil',compact(['data']));
 }
 
@@ -100,7 +111,6 @@ function editprofile(request $request) {
     $data = session('admin_id');
 
     $data = Admin::where('admin_id', $data)->first();
-    // dd($user);
     $data->update([
         'nama' =>($request->input('nama')),
         'email' =>($request->input('email')),
@@ -147,6 +157,14 @@ function logpage()
 
 function login (request $request){
 
+    $validator = $request->validate([
+        'nomor_telepon' => 'required',
+        'password'=>'required',
+        ],[
+        'nomor_telepon.required' => 'Nomor Telepon Harus Diisi',
+        'password.required'=>'Password Harus Diisi']);
+
+
     $nomor_telepon = $request->input('nomor_telepon');
     $password = $request->input('password');
 
@@ -161,7 +179,7 @@ function login (request $request){
             'admin_foto'=>$admin->foto,
         ]);
 
-        return redirect('/dashboard')->with('success','Berhasil Login');
+        return redirect('/dashboard')->with('success','Selamat Datang Kembali Admin');
     } else {
         return redirect('/')->with('error', 'Invalid email or password');
     }
@@ -169,11 +187,11 @@ function login (request $request){
 
 
 // <!----LOGOUT----!>
-function logout(Request $request)
+function logout()
 {
-    $request->session()->forget('admin_id');
-    $request->session()->forget('admin_nama');
-    $request->session()->forget('admin_nomor_telepon');
+    session()->flush();
+    // session()->flush('admin_nama');
+    // session()->flush('admin_nomor_telepon');
     
     return redirect('/')->with('success','Berhasil Logout');
 }
